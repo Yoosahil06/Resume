@@ -1,693 +1,75 @@
-// DOM Content Loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all functionality
-    initNavigation();
-    initScrollAnimations();
-    initSkillsSection();
-    initTypingEffect();
-    initContactForm();
-    initFloatingElements();
-    initProgressBars();
-});
+const projects = [
+  {title:'Techflow ERP',short:'TECHFLOW ERP',kind:'SHARED PROJECT',context:'Collaborative work with Deep Gandhi · Manufacturing ERP',status:'Outcome reported by Deep Gandhi’s portfolio',category:'MANUFACTURING / ERP',summary:'A manufacturing operations platform connecting workflows across inventory, machine planning, maintenance, service, visitor management, and paint jobs.',points:['Connected six operational areas in one platform: Inventory, Machine Planning, Maintenance, Service, Visitor, and Paint Job.','Supported real-time machine planning and tracking.','Deep Gandhi’s portfolio reports 200+ work hours saved weekly; this figure is attributed to that source.'],tech:'Django · React · PostgreSQL · Docker',note:'Shared project. The reported time savings are attributed to Deep Gandhi’s portfolio.',color:'#496d57',ink:'#f3ebd8',emblem:'✳'},
+  {title:'Unified Equipment Monitoring',short:'EQUIPMENT MONITORING',kind:'TEAM CAPSTONE',context:'Daemyung Steel · Team MEGAMIND',status:'Capstone project · proposed system',category:'INDUSTRIAL / DATA',summary:'A team capstone exploring how equipment signals could give production teams a live and historical view of industrial machines.',points:['Planned PLC data ingestion with I/O mapping and alarm visibility.','Designed live and historical dashboard views for equipment data.','The proposed architecture used FastAPI, WebSockets, and DuckDB.'],tech:'FastAPI · WebSockets · DuckDB · PLC data',note:'Project details describe the capstone scope and proposed architecture.',color:'#536f78',ink:'#f3ebd8',emblem:'⌁'},
+  {title:'CAD System Development',short:'CAD SYSTEMS',kind:'DEVELOPMENT WORK',context:'CAD development and workflow automation',status:'Development work',category:'CAD / AUTOMATION',summary:'Development work focused on CAD tools and automation, with the goal of reducing repetitive technical workflows.',points:['Explored CAD system development and automation opportunities.','Worked with AutoCAD and Fusion 360 in technical workflows.','Focused on making repeated design tasks easier to manage.'],tech:'AutoCAD · Fusion 360 · CAD automation',note:'The project description is kept to the scope established in the portfolio discussion.',color:'#7d7652',ink:'#f7f0dd',emblem:'⌂'},
+  {title:'Restaurant Edge Growth AI',short:'EDGE GROWTH AI',kind:'PRODUCT CONCEPT',context:'Independent product idea · local restaurant marketing',status:'Product concept',category:'AI / LOCAL BUSINESS',summary:'A lightweight assistant concept to help restaurants turn customer feedback into review content and plan practical local-search improvements.',points:['Collect simple ratings for food, service, and cleanliness, then help draft review text for platforms such as Naver or Kakao.','Explore competitor keyword scanning and monthly local SEO recommendations.','The product direction favors a lightweight, locally operated workflow to limit recurring cloud costs.'],tech:'AI-assisted writing · Feedback data · Local SEO',note:'Concept and pitch work; this is not presented as a launched product.',color:'#a85f43',ink:'#fbefda',emblem:'✦'},
+  {title:'Restaurant Schedule Assistant',short:'SHIFT ASSISTANT',kind:'PRODUCT CONCEPT',context:'Workflow concept · restaurant shift scheduling',status:'Concept / prototype exploration',category:'WORKFLOW / OCR',summary:'A scheduling assistant idea for turning paper or spreadsheet shift plans into organized, reviewable digital schedules.',points:['Import schedule information from spreadsheets or photos.','Explore OCR for handwritten Korean shift grids.','Let a person check and correct imported shifts before using the schedule.'],tech:'OCR exploration · Workflow design · Data review',note:'Concept exploration; no production deployment is claimed.',color:'#a17d4c',ink:'#fff3dc',emblem:'▦'},
+  {title:'NAVER Maps Events Page',short:'MAPS & EVENTS',kind:'WEB INTEGRATION',context:'React web project · map-based event discovery',status:'Web integration project',category:'WEB / MAPS',summary:'A React page concept for finding events through a map, with interactive markers that reveal event details.',points:['Integrated a map component with a reusable loader.','Added interactive markers and information windows for event locations.','Focused on making locations and event details easy to explore together.'],tech:'React · JavaScript · NAVER Maps API',note:'Portfolio project details reflect the integration work discussed.',color:'#4e756d',ink:'#f2eddc',emblem:'⌖'},
+  {title:'Blood-Cancer Detection AI',short:'MEDICAL AI',kind:'EARLY AI CONCEPT',context:'Early learning concept · AI and healthcare data',status:'Early-stage concept',category:'AI / HEALTHCARE',summary:'An early concept exploring whether AI methods could support classification from blood-related medical data.',points:['Considered laboratory data and medical imagery as possible inputs.','Framed as a future learning prototype rather than a validated screening tool.','No clinical performance or diagnostic use is claimed.'],tech:'AI fundamentals · Data exploration',note:'Early-stage concept only; not a clinical system.',color:'#815c61',ink:'#faeee1',emblem:'＋'}
+];
 
-// Navigation functionality
-function initNavigation() {
-    const hamburger = document.querySelector('.hamburger');
-    const navMenu = document.querySelector('.nav-menu');
-    const navLinks = document.querySelectorAll('.nav-link');
+const shelf=document.querySelector('#bookcase');
+const dialog=document.querySelector('#project-dialog');
+const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const colors=['#496d57','#536f78','#7d7652','#a85f43','#a17d4c','#4e756d','#815c61'];
 
-    // Mobile menu toggle
-    hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        navMenu.classList.toggle('active');
-    });
-
-    // Close mobile menu when clicking on a link
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-        });
-    });
-
-    // Smooth scrolling for navigation links
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = link.getAttribute('href');
-            const targetSection = document.querySelector(targetId);
-            
-            if (targetSection) {
-                const offsetTop = targetSection.offsetTop - 70; // Account for fixed navbar
-                window.scrollTo({
-                    top: offsetTop,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-
-    // Active navigation highlighting
-    window.addEventListener('scroll', () => {
-        let current = '';
-        const sections = document.querySelectorAll('section');
-        
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop - 100;
-            const sectionHeight = section.clientHeight;
-            
-            if (window.pageYOffset >= sectionTop && window.pageYOffset < sectionTop + sectionHeight) {
-                current = section.getAttribute('id');
-            }
-        });
-
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${current}`) {
-                link.classList.add('active');
-            }
-        });
-    });
+function makeBook(project,index){
+  const button=document.createElement('button');
+  button.type='button';button.className='project-book';
+  button.style.setProperty('--book-color',project.color||colors[index%colors.length]);
+  button.style.setProperty('--book-ink',project.ink||'#f2ead9');
+  button.setAttribute('aria-label',`Open project: ${project.title}`);
+  button.innerHTML=`<span class="book-spine"><span class="book-topline">${String(index+1).padStart(2,'0')} · ${project.kind}</span><span class="book-emblem" aria-hidden="true">${project.emblem||'✳'}</span><span class="book-rule"></span><span class="book-title">${project.short||project.title.toUpperCase()}</span><span class="book-number">SG / ${String(index+1).padStart(2,'0')}</span></span>`;
+  button.addEventListener('click',()=>openProject(project,index,button));
+  return button;
 }
 
-// Scroll animations
-function initScrollAnimations() {
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                
-                // Trigger skill progress bars when skills section is visible
-                if (entry.target.id === 'skills') {
-                    animateProgressBars();
-                }
-            }
-        });
-    }, observerOptions);
-
-    // Observe all sections and cards
-    const elementsToObserve = document.querySelectorAll('section, .skill-card, .project-card, .timeline-item, .highlight-item');
-    elementsToObserve.forEach(el => {
-        el.classList.add('fade-in');
-        observer.observe(el);
-    });
+function renderShelf(){
+  shelf.replaceChildren();
+  for(let i=0;i<projects.length;i+=6){
+    const row=document.createElement('div');row.className='shelf-row';row.setAttribute('role','group');row.setAttribute('aria-label',`Shelf ${Math.floor(i/6)+1}`);
+    projects.slice(i,i+6).forEach((project,offset)=>row.append(makeBook(project,i+offset)));
+    shelf.append(row);
+  }
+  const count=String(projects.length).padStart(2,'0');
+  document.querySelector('#project-count').textContent=count;
+  document.querySelector('#shelf-count').textContent=`${count} PROJECTS`;
 }
 
-// Skills section functionality
-function initSkillsSection() {
-    const skillCategories = document.querySelectorAll('.skill-category');
-    const skillCards = document.querySelectorAll('.skill-card');
-
-    // Category filtering
-    skillCategories.forEach(category => {
-        category.addEventListener('click', () => {
-            // Remove active class from all categories
-            skillCategories.forEach(cat => cat.classList.remove('active'));
-            // Add active class to clicked category
-            category.classList.add('active');
-
-            const selectedCategory = category.getAttribute('data-category');
-            
-            // Filter skill cards
-            skillCards.forEach(card => {
-                const cardCategory = card.getAttribute('data-category');
-                
-                if (selectedCategory === 'all' || cardCategory === selectedCategory) {
-                    card.style.display = 'block';
-                    card.style.animation = 'fadeInUp 0.5s ease-out';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
-    });
-
-    // Skill card interactions
-    skillCards.forEach(card => {
-        card.addEventListener('mouseenter', () => {
-            // Add hover effect
-            card.style.transform = 'translateY(-10px) scale(1.02)';
-            
-            // Animate progress bar on hover
-            const progressBar = card.querySelector('.progress-bar');
-            const progress = progressBar.getAttribute('data-progress');
-            progressBar.style.width = progress + '%';
-        });
-
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'translateY(0) scale(1)';
-        });
-
-        // Click to expand functionality
-        card.addEventListener('click', () => {
-            card.classList.toggle('expanded');
-            
-            // Create expanded content if it doesn't exist
-            let expandedContent = card.querySelector('.expanded-content');
-            if (!expandedContent) {
-                expandedContent = createExpandedContent(card);
-                card.appendChild(expandedContent);
-            }
-            
-            // Toggle expanded content visibility
-            if (card.classList.contains('expanded')) {
-                expandedContent.style.maxHeight = expandedContent.scrollHeight + 'px';
-                expandedContent.style.opacity = '1';
-            } else {
-                expandedContent.style.maxHeight = '0';
-                expandedContent.style.opacity = '0';
-            }
-        });
-    });
+function openProject(project,index,source){
+  if(dialog.open)return;
+  document.querySelector('#dialog-kicker').textContent=`${String(index+1).padStart(2,'0')} / ${project.kind}`;
+  document.querySelector('#dialog-cover-title').textContent=project.title;
+  document.querySelector('#dialog-meta').textContent=project.category;
+  document.querySelector('#dialog-title').textContent=project.title;
+  document.querySelector('#dialog-summary').textContent=project.summary;
+  document.querySelector('#dialog-context').textContent=project.context;
+  document.querySelector('#dialog-points').replaceChildren(...project.points.map(text=>{const li=document.createElement('li');li.textContent=text;return li;}));
+  document.querySelector('#dialog-tech').textContent=project.tech;
+  document.querySelector('#dialog-status').textContent=project.status;
+  document.querySelector('#dialog-note').textContent=project.note||'';
+  const cover=document.querySelector('.book-cover-page');cover.style.setProperty('--open-color',project.color||colors[index%colors.length]);
+  if(reduceMotion){dialog.showModal();return;}
+  const rect=source.getBoundingClientRect();
+  const flyer=document.createElement('div');flyer.className='flying-book';flyer.setAttribute('aria-hidden','true');flyer.innerHTML=`<span>${project.short||project.title.toUpperCase()}</span>`;
+  flyer.style.setProperty('--fly-x',`${rect.left+rect.width/2-window.innerWidth/2}px`);
+  flyer.style.setProperty('--fly-y',`${rect.top+rect.height/2-window.innerHeight/2}px`);
+  flyer.style.setProperty('--fly-color',project.color||colors[index%colors.length]);
+  document.body.append(flyer);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>flyer.classList.add('fly-open')));
+  window.setTimeout(()=>{flyer.remove();dialog.showModal();},640);
 }
 
-// Create expanded content for skill cards
-function createExpandedContent(card) {
-    const skillName = card.getAttribute('data-skill');
-    const expandedContent = document.createElement('div');
-    expandedContent.className = 'expanded-content';
-    
-    // Sample expanded content based on skill
-    const skillDetails = getSkillDetails(skillName);
-    
-    expandedContent.innerHTML = `
-        <div class="expanded-details">
-            <h4>Key Features:</h4>
-            <ul>
-                ${skillDetails.features.map(feature => `<li>${feature}</li>`).join('')}
-            </ul>
-            <h4>Experience Level:</h4>
-            <p>${skillDetails.experience}</p>
-            <h4>Recent Projects:</h4>
-            <p>${skillDetails.projects}</p>
-        </div>
-    `;
-    
-    expandedContent.style.maxHeight = '0';
-    expandedContent.style.opacity = '0';
-    expandedContent.style.overflow = 'hidden';
-    expandedContent.style.transition = 'all 0.3s ease-out';
-    expandedContent.style.marginTop = '1rem';
-    expandedContent.style.padding = '0 1rem';
-    
-    return expandedContent;
-}
+renderShelf();
 
-// Get skill details for expanded content
-function getSkillDetails(skillName) {
-    const skillsData = {
-        'Advanced CSS': {
-            features: ['Responsive Design', 'CSS Grid & Flexbox', 'Animations & Transitions', 'Modern CSS Features'],
-            experience: '3+ years of creating modern, responsive interfaces',
-            projects: 'Portfolio websites, web applications, and interactive components'
-        },
-        'JavaScript': {
-            features: ['ES6+ Features', 'DOM Manipulation', 'Async Programming', 'API Integration'],
-            experience: '3+ years of frontend and backend JavaScript development',
-            projects: 'Interactive web apps, game development, and automation scripts'
-        },
-        'Node.js': {
-            features: ['Express.js', 'RESTful APIs', 'Database Integration', 'Authentication'],
-            experience: '2+ years of server-side development',
-            projects: 'Web APIs, real-time applications, and backend services'
-        },
-        'Python': {
-            features: ['Automation Scripts', 'Data Processing', 'Web Development', 'System Integration'],
-            experience: '3+ years across multiple domains',
-            projects: 'ERP automation, data analysis, and web applications'
-        },
-        'Django': {
-            features: ['MVC Architecture', 'ORM', 'Admin Interface', 'Security Features'],
-            experience: '2+ years of full-stack web development',
-            projects: 'Business applications, content management systems'
-        },
-        'Unity': {
-            features: ['2D & 3D Development', 'Physics Systems', 'Animation', 'Optimization'],
-            experience: '2+ years of game development',
-            projects: 'MOBA games, interactive experiences, and prototypes'
-        },
-        'CAD Development': {
-            features: ['AutoCAD Customization', 'Fusion 360 Scripts', 'Automation Tools', 'Plugin Development'],
-            experience: '1+ years of CAD programming',
-            projects: 'Industrial automation tools and custom CAD solutions'
-        },
-        'ERP Automation': {
-            features: ['Workflow Automation', 'Data Integration', 'Process Optimization', 'Reporting Systems'],
-            experience: '2+ years in industrial settings',
-            projects: 'Manufacturing process automation and business intelligence'
-        },
-        'Animation': {
-            features: ['2D Animation', '3D Modeling', 'Motion Graphics', 'Storytelling'],
-            experience: '2+ years of creative content production',
-            projects: 'Short films, game assets, and promotional content'
-        },
-        'IT Fundamentals': {
-            features: ['Network Administration', 'System Management', 'Hardware Troubleshooting', 'Security'],
-            experience: '3+ years of IT support and administration',
-            projects: 'System optimization, network setup, and technical support'
-        }
-    };
-    
-    return skillsData[skillName] || {
-        features: ['Professional expertise', 'Industry best practices', 'Continuous learning'],
-        experience: 'Experienced professional with proven track record',
-        projects: 'Multiple successful projects and implementations'
-    };
-}
-
-// Typing effect for hero section
-function initTypingEffect() {
-    const typingText = document.querySelector('.typing-text');
-    if (!typingText) return;
-
-    const text = "Hi, I'm Sahil Gevariya";
-    const speed = 100;
-    let i = 0;
-
-    typingText.textContent = '';
-
-    function typeWriter() {
-        if (i < text.length) {
-            typingText.textContent += text.charAt(i);
-            i++;
-            setTimeout(typeWriter, speed);
-        } else {
-            // Add blinking cursor effect
-            typingText.style.borderRight = '2px solid #00FFAB';
-            typingText.style.animation = 'blink 1s infinite';
-        }
-    }
-
-    // Start typing effect after a short delay
-    setTimeout(typeWriter, 500);
-}
-
-// Progress bars animation
-function initProgressBars() {
-    // This will be called when skills section comes into view
-}
-
-function animateProgressBars() {
-    const progressBars = document.querySelectorAll('.progress-bar');
-    
-    progressBars.forEach((bar, index) => {
-        const progress = bar.getAttribute('data-progress');
-        
-        setTimeout(() => {
-            bar.style.width = progress + '%';
-        }, index * 100); // Stagger the animations
-    });
-}
-
-// Floating elements animation
-function initFloatingElements() {
-    const floatingIcons = document.querySelectorAll('.floating-icon');
-    
-    floatingIcons.forEach((icon, index) => {
-        // Add random movement
-        setInterval(() => {
-            const randomX = Math.random() * 10 - 5;
-            const randomY = Math.random() * 10 - 5;
-            
-            icon.style.transform = `translate(${randomX}px, ${randomY}px)`;
-        }, 2000 + index * 500);
-
-        // Add hover effects
-        icon.addEventListener('mouseenter', () => {
-            icon.style.transform = 'scale(1.2) rotate(10deg)';
-            icon.style.boxShadow = '0 10px 30px rgba(0, 255, 171, 0.3)';
-        });
-
-        icon.addEventListener('mouseleave', () => {
-            icon.style.transform = 'scale(1) rotate(0deg)';
-            icon.style.boxShadow = 'none';
-        });
-    });
-}
-
-// Contact form functionality
-function initContactForm() {
-    const contactForm = document.querySelector('.form');
-    if (!contactForm) return;
-
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        // Get form data
-        const formData = new FormData(contactForm);
-        const formInputs = contactForm.querySelectorAll('.form-input');
-        const submitBtn = contactForm.querySelector('.btn-primary');
-        
-        // Disable form during submission
-        formInputs.forEach(input => input.disabled = true);
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending...';
-        
-        // Simulate form submission (replace with actual form handling)
-        setTimeout(() => {
-            // Show success message
-            showNotification('Message sent successfully! I\'ll get back to you soon.', 'success');
-            
-            // Reset form
-            contactForm.reset();
-            
-            // Re-enable form
-            formInputs.forEach(input => input.disabled = false);
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Send Message';
-        }, 2000);
-    });
-
-    // Form input animations
-    const formInputs = document.querySelectorAll('.form-input');
-    formInputs.forEach(input => {
-        input.addEventListener('focus', () => {
-            input.parentElement.classList.add('focused');
-        });
-
-        input.addEventListener('blur', () => {
-            if (!input.value) {
-                input.parentElement.classList.remove('focused');
-            }
-        });
-    });
-}
-
-// Notification system
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.textContent = message;
-    
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#10B981' : '#00FFAB'};
-        color: #1A1A2E;
-        padding: 1rem 2rem;
-        border-radius: 10px;
-        font-weight: 600;
-        z-index: 10000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease-out;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Animate in
-    setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-    }, 100);
-    
-    // Animate out and remove
-    setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
-    }, 4000);
-}
-
-// Particle background effect (subtle)
-function initParticleBackground() {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    canvas.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: -1;
-        opacity: 0.1;
-    `;
-    
-    document.body.appendChild(canvas);
-    
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-    
-    const particles = [];
-    const particleCount = 50;
-    
-    // Create particles
-    for (let i = 0; i < particleCount; i++) {
-        particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * 0.5,
-            vy: (Math.random() - 0.5) * 0.5,
-            size: Math.random() * 2 + 1
-        });
-    }
-    
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        particles.forEach(particle => {
-            // Update position
-            particle.x += particle.vx;
-            particle.y += particle.vy;
-            
-            // Wrap around edges
-            if (particle.x < 0) particle.x = canvas.width;
-            if (particle.x > canvas.width) particle.x = 0;
-            if (particle.y < 0) particle.y = canvas.height;
-            if (particle.y > canvas.height) particle.y = 0;
-            
-            // Draw particle
-            ctx.beginPath();
-            ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-            ctx.fillStyle = '#00FFAB';
-            ctx.fill();
-        });
-        
-        requestAnimationFrame(animate);
-    }
-    
-    animate();
-}
-
-// Initialize particle background
-// initParticleBackground();
-
-// Smooth scroll to top functionality
-function scrollToTop() {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-}
-
-// Add scroll to top button
-function initScrollToTop() {
-    const scrollBtn = document.createElement('button');
-    scrollBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
-    scrollBtn.className = 'scroll-to-top';
-    scrollBtn.style.cssText = `
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(45deg, #00FFAB, #10B981);
-        color: #1A1A2E;
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        font-size: 1.2rem;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-        z-index: 1000;
-        box-shadow: 0 5px 15px rgba(0, 255, 171, 0.3);
-    `;
-    
-    document.body.appendChild(scrollBtn);
-    
-    scrollBtn.addEventListener('click', scrollToTop);
-    
-    // Show/hide scroll button based on scroll position
-    window.addEventListener('scroll', () => {
-        if (window.pageYOffset > 300) {
-            scrollBtn.style.opacity = '1';
-            scrollBtn.style.visibility = 'visible';
-        } else {
-            scrollBtn.style.opacity = '0';
-            scrollBtn.style.visibility = 'hidden';
-        }
-    });
-}
-
-// Initialize scroll to top button
-initScrollToTop();
-
-// Add CSS for blinking cursor animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes blink {
-        0%, 50% { border-color: #00FFAB; }
-        51%, 100% { border-color: transparent; }
-    }
-    
-    .expanded-content {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 10px;
-        padding: 1rem;
-        margin-top: 1rem;
-    }
-    
-    .expanded-content h4 {
-        color: #10B981;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
-    }
-    
-    .expanded-content ul {
-        list-style: none;
-        padding-left: 0;
-        margin-bottom: 1rem;
-    }
-    
-    .expanded-content li {
-        padding: 0.2rem 0;
-        padding-left: 1rem;
-        position: relative;
-        font-size: 0.85rem;
-        opacity: 0.8;
-    }
-    
-    .expanded-content li::before {
-        content: '▸';
-        position: absolute;
-        left: 0;
-        color: #00FFAB;
-    }
-    
-    .expanded-content p {
-        font-size: 0.85rem;
-        opacity: 0.8;
-        margin-bottom: 0.5rem;
-    }
-`;
-
-document.head.appendChild(style);
-
-// Performance optimization: Debounce scroll events
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Apply debouncing to scroll events
-const debouncedScrollHandler = debounce(() => {
-    // Handle scroll events here if needed
-}, 10);
-
-window.addEventListener('scroll', debouncedScrollHandler);
-
-// Preload critical resources
-function preloadResources() {
-    const criticalResources = [
-        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
-        'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap'
-    ];
-    
-    criticalResources.forEach(resource => {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.as = 'style';
-        link.href = resource;
-        document.head.appendChild(link);
-    });
-}
-
-// Initialize preloading
-preloadResources();
-
-// Add loading animation
-function showLoadingAnimation() {
-    const loader = document.createElement('div');
-    loader.id = 'page-loader';
-    loader.innerHTML = `
-        <div class="loader-content">
-            <div class="loader-spinner"></div>
-            <p>Loading Portfolio...</p>
-        </div>
-    `;
-    
-    loader.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #1A1A2E;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-        transition: opacity 0.5s ease-out;
-    `;
-    
-    const loaderStyle = document.createElement('style');
-    loaderStyle.textContent = `
-        .loader-content {
-            text-align: center;
-            color: #EEEEEE;
-        }
-        
-        .loader-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(0, 255, 171, 0.3);
-            border-top: 3px solid #00FFAB;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    `;
-    
-    document.head.appendChild(loaderStyle);
-    document.body.appendChild(loader);
-    
-    // Hide loader when page is fully loaded
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            loader.style.opacity = '0';
-            setTimeout(() => {
-                document.body.removeChild(loader);
-                document.head.removeChild(loaderStyle);
-            }, 500);
-        }, 1000);
-    });
-}
-
-// Show loading animation
-showLoadingAnimation();
+const progress=document.querySelector('#reading-progress-bar');
+function updateProgress(){const max=document.documentElement.scrollHeight-window.innerHeight;progress.style.width=`${max>0?window.scrollY/max*100:0}%`;}
+window.addEventListener('scroll',updateProgress,{passive:true});window.addEventListener('resize',updateProgress);updateProgress();
+const nav=document.querySelector('#main-nav'),menuToggle=document.querySelector('.menu-toggle');
+menuToggle.addEventListener('click',()=>{const isOpen=menuToggle.getAttribute('aria-expanded')!=='true';menuToggle.setAttribute('aria-expanded',String(isOpen));menuToggle.setAttribute('aria-label',isOpen?'Close navigation':'Open navigation');nav.classList.toggle('open',isOpen);});
+nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','Open navigation');}));
+let closeTimer;
+function closeProject(){if(!dialog.open||dialog.classList.contains('is-closing'))return;if(reduceMotion){dialog.close();return;}dialog.classList.add('is-closing');closeTimer=window.setTimeout(()=>{dialog.close();dialog.classList.remove('is-closing');},190);}
+document.querySelector('.dialog-close').addEventListener('click',closeProject);
+dialog.addEventListener('click',event=>{if(event.target===dialog)closeProject();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&dialog.open){event.preventDefault();closeProject();}});
